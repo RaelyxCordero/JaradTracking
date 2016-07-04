@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Jarad Tracking</string>
+    <string name="title_activity_register">Registro</string>
+    <string name= "ServerAPIKey">AIzaSyD2f27ca1YAv2aUvzpDfJ90MrmeWXuomAw</string>
+    <string name= "SenderID">604557668900</string>
+    <string name="ipServerSocket">http://192.168.200.103:3000</string>
+</resources>
