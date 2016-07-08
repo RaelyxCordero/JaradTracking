@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "604557668900",
+    "project_id": "jarad-tracking"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604557668900:android:ab30756dbcc6a241",
+        "android_client_info": {
+          "package_name": "com.software.ing.jaradtracking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7dsfqdAbYDULTqxjxugw_wcyGZXpc31Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

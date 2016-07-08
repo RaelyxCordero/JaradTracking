@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customfont="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    customfont:fontName="AvenirMedium.otf">
+
+    <android.support.v7.widget.ActionBarContainer
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary2"
+        customfont:fontName="AvenirMedium.otf"
+        android:layout_gravity="end">
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary2"
+            android:id="@+id/toolbar"
+            customfont:fontName="AvenirMedium.otf"
+            customfont:title="@string/title_activity_register"
+            customfont:titleTextColor="@color/colorAccent2"/>
+
+    </android.support.v7.widget.ActionBarContainer>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/activity_vertical_margin"
+        android:orientation="vertical">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp">
+            <com.software.ing.jaradtracking.Views.CustomFontEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:drawablePadding="15dp"
+                android:id="@+id/username"
+                android:inputType="text"
+                customfont:fontName="AvenirMedium.otf"
+                android:hint="Usuario"
+                android:textColorHint="#ffcecece"
+                android:layout_marginRight="10dp"
+                android:textSize="17dp"
+                android:textColor="#000000"
+                android:singleLine="true" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp">
+            <com.software.ing.jaradtracking.Views.CustomFontEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:drawablePadding="15dp"
+                android:inputType="number"
+                android:id="@+id/telefono"
+                customfont:fontName="AvenirMedium.otf"
+                android:hint="Telefono"
+                android:textColorHint="#ffcecece"
+                android:layout_marginRight="10dp"
+                android:textSize="17dp"
+                android:textColor="#000000"
+                android:singleLine="true" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <com.software.ing.jaradtracking.Views.CustomFontButton
+            android:id="@+id/registro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="#d20917"
+            customfont:fontName="AvenirMedium.otf"
+            android:textColor="@color/colorAccent2"
+            android:text="REGISTRO" />
+    </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
+
+
+

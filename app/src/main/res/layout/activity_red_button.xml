@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:customfont="http://schemas.android.com/tools"
+    android:background="@android:color/background_dark">
+
+    <android.support.v7.widget.ActionBarContainer
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        customfont:fontName="AvenirMedium.otf"
+        android:layout_gravity="end">
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary2"
+            android:id="@+id/toolbar"
+            customfont:fontName="AvenirMedium.otf"
+            customfont:titleTextColor="@color/colorAccent2"/>
+
+    </android.support.v7.widget.ActionBarContainer>
+
+    <ImageView
+        android:layout_centerInParent="true"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:id="@+id/redButton"
+        android:src="@drawable/boton_rojo"/>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/config"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:menu_colorNormal="#eaeaea"
+        app:menu_colorPressed="#898989"
+        app:menu_colorRipple="#808080"
+        app:menu_icon="@drawable/config"
+        app:menu_labels_position="left"
+        app:menu_backgroundColor="#bf212121"
+        app:menu_fab_size="mini"
+        app:menu_openDirection="down"
+        android:layout_gravity="top"
+        android:padding="25dp">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="Configuracion de Bloqueo"
+            app:fab_colorNormal="@color/rojoClaro"
+            app:fab_colorPressed="#898989"
+            android:src="@drawable/password"
+            android:id="@+id/bloqueo"
+            app:fab_size="mini"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="Configuracion de Mensajes"
+            app:fab_colorNormal="@color/rojoClaro"
+            app:fab_colorPressed="#898989"
+            app:fab_size="mini"
+            android:id="@+id/mensajes"
+            android:src="@drawable/message"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="A quien enviar Mensajes"
+            app:fab_colorNormal="@color/rojoClaro"
+            app:fab_colorPressed="#898989"
+            app:fab_size="mini"
+            android:id="@+id/aQuien"
+            android:src="@drawable/interrigation"/>
+
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+</RelativeLayout>
