@@ -9,7 +9,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 
-
 public class GPSManager {
 
     private static final int REQUEST_CODE = 0;
@@ -27,7 +26,9 @@ public class GPSManager {
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
     private Activity activity;
 
-    public GPSManager(Activity activity){
+
+    public GPSManager(Activity activity)
+    {
         this.context=activity;
         this.activity=activity;
         this.listener=(LocationListener)activity;
@@ -36,7 +37,9 @@ public class GPSManager {
 
     }
 
-    public GPSManager(Context activity)    {
+    public GPSManager(Context activity)
+    {
+
         this.context=activity;
         this.listener=(LocationListener)activity;
         location=obtainLastKnowLocation();

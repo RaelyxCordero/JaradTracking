@@ -1,8 +1,5 @@
 package com.software.ing.jaradtracking.utils;
 
-/**
- * Created by Jhonny on 18/9/2015.
- */
 public class Constants {
     public static final String NIVEL_ESTUDIANTE = "1";
     public static final int AREA_TODAS = 0;

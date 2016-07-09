@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
 public class PictureSaver {
 
     private static final String TAG = "PictureSaver";

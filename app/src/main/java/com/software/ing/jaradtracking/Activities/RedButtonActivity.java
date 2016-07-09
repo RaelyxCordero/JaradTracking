@@ -1,5 +1,6 @@
 package com.software.ing.jaradtracking.Activities;
 
+
 import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
@@ -16,6 +17,7 @@ import com.software.ing.jaradtracking.R;
 import com.software.ing.jaradtracking.fragments.AquienDialogFragment;
 import com.software.ing.jaradtracking.fragments.BloqueoDialogFragment;
 import com.software.ing.jaradtracking.fragments.MensajesDialogFragment;
+
 import com.software.ing.jaradtracking.services.PanicService;
 
 import butterknife.ButterKnife;
@@ -35,7 +37,9 @@ public class RedButtonActivity extends AppCompatActivity implements View.OnClick
     @InjectView(R.id.redButton)
     ImageView redButton;
 
+
     boolean activedService = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +72,7 @@ public class RedButtonActivity extends AppCompatActivity implements View.OnClick
                 break;
 
             case R.id.redButton:
+
                 if(!activedService){
                     startPanicService();
                     activedService = true;
@@ -81,8 +86,11 @@ public class RedButtonActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
+
     private void startPanicService()    {        startService(new Intent(this, PanicService.class));    }
     private void stopPanicService() {        stopService(new Intent(this, PanicService.class));    }
+
+
 
     @Override
     protected void onDestroy() {
