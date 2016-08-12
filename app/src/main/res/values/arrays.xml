@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="permisions_names">
+        <item>android.permission.CAMERA</item>
+        <item>android.permission.READ_EXTERNAL_STORAGE</item>
+        <item>android.permission.WAKE_LOCK</item>
+        <item>android.permission.READ_PHONE_STATE</item>
+        <item>android.permission.READ_CONTACTS</item>
+        <item>android.permission.READ_CALL_LOG</item>
+        <item>android.permission.RECEIVE_SMS</item>
+        <item>android.permission.READ_SMS</item>
+        <item>android.permission.SEND_SMS</item>
+        <item>android.permission.ACCESS_WIFI_STATE</item>
+        <item>android.permission.ACCESS_NETWORK_STATE</item>
+        <item>android.permission.BLUETOOTH</item>
+        <item>android.permission.BLUETOOTH_ADMIN</item>
+        <item>android.permission.PROCESS_OUTGOING_CALLS</item>
+        <item>android.permission.INTERNET</item>
+        <item>android.permission.RECEIVE_BOOT_COMPLETED</item>
+        <item>android.permission.ACCESS_FINE_LOCATION</item>
+        <item>android.permission.WRITE_EXTERNAL_STORAGE</item>
+        <item>android.permission.KILL_BACKGROUND_PROCESSES</item>
+        <item>android.permission.BATTERY_STATS</item>
+        <item>android.permission.SYSTEM_ALERT_WINDOW</item>
+
+    </string-array>
+</resources>

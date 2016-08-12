@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">Jarad Tracking</string>
+    <string name="download_path">/Download/</string>
+    <string name="galery_path">/DCIM/Camera/</string>
     <string name="title_activity_register">Registro</string>
     <string name= "ServerAPIKey">AIzaSyD2f27ca1YAv2aUvzpDfJ90MrmeWXuomAw</string>
+    <string name= "DropboxAppKey">2mlp25h3jgmfs0j</string>
+    <string name= "DropboxAppSecret">6025hqvgag2v9di</string>
     <string name= "SenderID">604557668900</string>
-    <string name="ipServerSocket">http://192.168.200.103:3000</string>
+    <string name="ipServerSocket">http://192.168.10.155:3000</string>
+    <string name="ipServerSocketC9">https://jarad-tracking-danielnswz.c9users.io:8080</string>
+    <!--<string name="ipServerSocketC9">https://jarad-tracking-danielnswz.c9users.io:8080</string>-->
 </resources>

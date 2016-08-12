@@ -22,23 +22,22 @@ public class GPSManager {
     double lat;
     double lon;
 
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters
+    public static final long MIN_TIME_BW_UPDATES = 1000 * 10 ; // 10 seg
     private Activity activity;
 
 
-    public GPSManager(Activity activity)
-    {
+    public GPSManager(Activity activity){
         this.context=activity;
         this.activity=activity;
         this.listener=(LocationListener)activity;
         location=obtainLastKnowLocation();
         getMyLocation(activity);
-
     }
 
-    public GPSManager(Context activity)
-    {
+
+
+    public GPSManager(Context activity){
 
         this.context=activity;
         this.listener=(LocationListener)activity;
@@ -81,7 +80,7 @@ public class GPSManager {
         isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         if (!isGPSEnabled && !isNetworkEnabled)
         {
-            showWarning("Ubicacion desactivada","El Sistema de Emergencias de Buses UNEG necesita de la ubicación para informar al centro de control con mas detalle");
+            showWarning("Ubicacion desactivada","Jarad Tracking necesita de la ubicación");
         }
         if (isNetworkEnabled)
         {
@@ -231,4 +230,6 @@ public class GPSManager {
             showWarning("Ubicacion desactivada","El Sistema de Emergencias de Buses UNEG necesita de la ubicación para informar al centro de control con mas detalle",a);
         }
     }
+
+
 }

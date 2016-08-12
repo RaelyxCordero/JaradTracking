@@ -2,6 +2,7 @@ package com.software.ing.jaradtracking.utils;
 
 import android.net.Uri;
 import android.util.Base64;
+import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
 
@@ -35,6 +36,10 @@ public class Utils {
     }
 
     public static long getInterval(String intervalo) {
-        return Long.valueOf(intervalo)*1000;
+        return Long.valueOf(intervalo)*60000;
+    }
+
+    public static void log (String TAG, String msj){
+        Log.e("XD" + TAG, msj);
     }
 }
