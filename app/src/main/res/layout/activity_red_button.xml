@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:customfont="http://schemas.android.com/tools"
-    android:background="@android:color/background_dark">
+    android:background="@android:color/background_dark"
+    android:id="@+id/redButtonLayout">
 
     <android.support.v7.widget.ActionBarContainer
         android:layout_width="match_parent"
@@ -22,12 +23,12 @@
 
     </android.support.v7.widget.ActionBarContainer>
 
-    <ImageView
+    <ImageButton
         android:layout_centerInParent="true"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:id="@+id/redButton"
-        android:src="@drawable/boton_rojo"/>
+        android:background="@drawable/boton_rojo"/>
 
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/config"
@@ -47,7 +48,7 @@
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_label="Configuracion de Bloqueo"
+            app:fab_label="Configuracion de Tipo de Bloqueo"
             app:fab_colorNormal="@color/rojoClaro"
             app:fab_colorPressed="#898989"
             android:src="@drawable/password"
@@ -74,6 +75,15 @@
             android:id="@+id/aQuien"
             android:src="@drawable/interrigation"/>
 
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="Tiempo de Activación de Panico Remoto"
+            app:fab_colorNormal="@color/rojoClaro"
+            app:fab_colorPressed="#898989"
+            app:fab_size="mini"
+            android:id="@+id/remotePanic"
+            android:src="@drawable/warning"/>
 
     </com.github.clans.fab.FloatingActionMenu>
 

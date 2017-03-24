@@ -2,6 +2,7 @@ package com.software.ing.jaradtracking.Activities;
 
 
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,8 +20,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,6 +29,8 @@ import com.software.ing.jaradtracking.gcm.GCMRegistrationIntentService;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import permissions.dispatcher.PermissionUtils;
+
 import com.software.ing.jaradtracking.interfaces.ChangeListener;
 import com.software.ing.jaradtracking.utils.FilesUploaderManager;
 import com.software.ing.jaradtracking.utils.PermissionsDispatcher;
@@ -49,68 +50,51 @@ public class RegisterActivity extends AppCompatActivity {
     EditText telefono;
     @InjectView(R.id.registro)
     Button registrar;
-    @InjectView(R.id.toolbar)
-    Toolbar toolbar;
-    @InjectView(R.id.allRegister)
-    ScrollView allRegister;
-    @InjectView(R.id.progress)
-    FrameLayout progress;
     SocketManager socketManager;
-    String userDeviceToken;
     BroadcastReceiver mRegistrationBroadcastReceiver;
     public static UserPreferencesManager preferencesManager;
     String TAG = "REGISTERACT";
-    static String msg;
-    public static Context _context;
-    public static int OVERLAY_PERMISSION_REQ_CODE = 1234;
+    public static boolean dbAuth;
+    boolean socket = false;
+    FilesUploaderManager filesUploaderManager;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
         ButterKnife.inject(this);
-//        askManageOverlay();
-        init();
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permission, int[] grantResult){
-        super.onRequestPermissionsResult(requestCode, permission, grantResult);
-        PermissionsDispatcher.onRequestPermissionsResult(RegisterActivity.this, requestCode, grantResult);
-
-    }
-
-    public void askManageOverlay() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
-            }
-        }
+        socketManager = SocketManager.newInstance(this);
+        preferencesManager = new UserPreferencesManager(getApplicationContext());
+        filesUploaderManager = new FilesUploaderManager(getApplicationContext());
+        gcmIssues();
+        onlyOnceActivity();
+        dbAuth = false;
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!Settings.canDrawOverlays(this)) {
-                    finish();
-                }else{
-                    PermissionsDispatcher.showDialogPermissions(this);
-                }
-            }
-        }
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionsDispatcher.onRequestPermissionsResult(RegisterActivity.this, requestCode, grantResults);
+
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, 1234);
+
     }
 
     public void onlyOnceActivity(){
         SharedPreferences pref = getSharedPreferences("ActivityPREF", Context.MODE_PRIVATE);
         if(pref.getBoolean("activity_executed", false)){
+            Utils.log(TAG, "activity_executed false");
             Intent intent = new Intent(this, RedButtonActivity.class);
             startActivity(intent);
             finish();
         } else {
             SharedPreferences.Editor ed = pref.edit();
             ed.putBoolean("activity_executed", true);
+
             ed.commit();
         }
     }
@@ -122,23 +106,12 @@ public class RegisterActivity extends AppCompatActivity {
                 //Check type of intent filter
                 if(intent.getAction().equals(GCMRegistrationIntentService.REGISTRATION_SUCCESS)){
                     //Registration success
-                    userDeviceToken = intent.getStringExtra("token");
-                    preferencesManager.setToken(userDeviceToken);
-                    preferencesManager.setVariableChangeListener(new ChangeListener() {
-                        @Override
-                        public void onChange(String tokenThatHasChanged) {
-                            Log.e("TOKENONCHANGEregs", tokenThatHasChanged);
-                            startSocketService();
-                            progress.setVisibility(View.GONE);
-                            allRegister.setVisibility(View.VISIBLE);
+                    Utils.log(TAG, "token gcm: "+ intent.getStringExtra("token"));
 
-                        }
-                    });
 
-                    Toast.makeText(getApplicationContext(), "GCM token:" + userDeviceToken, Toast.LENGTH_LONG).show();
                 } else if(intent.getAction().equals(GCMRegistrationIntentService.REGISTRATION_ERROR)){
                     //Registration error
-                    //Toast.makeText(getApplicationContext(), "GCM registration error!!!", Toast.LENGTH_LONG).show();
+                    Utils.log(TAG, "gcm registration error");
                 }
             }
         };
@@ -161,82 +134,90 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void startSocketService()    {
-        Utils.log(TAG+"startsocket","ENTRO" );
-        SocketManager.startSocket();
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         Utils.log(TAG, "onResume" );
+        PermissionsDispatcher.showDialogPermissions(this);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_SUCCESS));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
 
 
     }
 
     public void init(){
-        socketManager = SocketManager.newInstance(this);
-        preferencesManager = new UserPreferencesManager(getApplicationContext());
-        gcmIssues();
-        _context = getApplicationContext();
-        allRegister.setVisibility(View.INVISIBLE);
-        /////////////////////
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_SUCCESS));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
+        //SE REGISTRA Y AUTENTICA EN DROPBOX
+        if ( (PermissionUtils.hasSelfPermissions(this, PermissionsDispatcher.PERMISSIONS))
+                && !preferencesManager.getToken().equals("")
+                && !socket){
+            SocketManager.startSocket();
+            socket = true;
+        }
+
+        if(preferencesManager.getTokenDB() == null){
+            if(!dbAuth){
+                filesUploaderManager.initialize_session(null);
+                dbAuth = true;
+            }
+        }
+
 
         registrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (!(user.getText().toString().equals("")) && !(telefono.getText().toString().equals(""))){
-                    JSONObject registerUser = new JSONObject();
-                    try {
-                        registerUser.put("nombre", user.getText().toString());
-                        registerUser.put("telefono", telefono.getText().toString());
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    //REGISTRAR USUARIO
+                    if(registerUser(user.getText().toString(), telefono.getText().toString())){
+                        Utils.log(TAG, "REGISTRO USUARIO");
                     }
-
-                    Utils.log(TAG,"" + registerUser );
-                    Utils.log(TAG,"" + "llamando socket manager" );
-                    SocketManager.emitRegister(registerUser); //REGISTRAR USUARIO
-                        msg = "Registró Exitosamente";
-
-                        //SE REGISTRA Y AUTENTICA EN DROPBOX
-                        FilesUploaderManager filesUploaderManager = new FilesUploaderManager(getApplicationContext());
-                        filesUploaderManager.initialize_session();
-                        filesUploaderManager.iniciarHilo();
-                        preferencesManager.setVariableChangeListener2(new ChangeListener() {
-                            @Override
-                            public void onChange(String tokenThatHasChanged) {
-                                Utils.log(TAG, "tokenThatHasChanged: " + tokenThatHasChanged);
-                                startActivity(new Intent(getApplicationContext(), RedButtonActivity.class));
-                            }
-                        });
-
                 }else{
                     Toast.makeText(getApplicationContext(), "Campos Vacios", Toast.LENGTH_LONG).show();
                 }
-
-
             }
         });
 
-        onlyOnceActivity();
+
+    }
+
+    public boolean registerUser(String name, String tlf){
+
+        JSONObject registerUser = new JSONObject();
+        try {
+            registerUser.put("nombre", name);
+            registerUser.put("telefono", tlf);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Utils.log(TAG,"" + registerUser );
+        Utils.log(TAG,"" + "llamando socket manager" );
+        SocketManager.emitRegister(registerUser);
+
+        startActivity(new Intent(getApplicationContext(), RedButtonActivity.class));
+
+
+        return true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Utils.log(TAG,"" + "onPause" );
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
     }
 }

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.software.ing.jaradtracking.Activities.RegisterActivity;
 import com.software.ing.jaradtracking.interfaces.ChangeListener;
 
 
@@ -14,9 +14,12 @@ public class UserPreferencesManager {
     private static final String KEY_CORREO = "CORREO";
     private static final String KEY_PANICO = "PANICO";
     private static final String KEY_PRESS_PANICO = "PANICO";
-    private static final String KEY_FILE = "FILE";
+    private static final String KEY_FILE_PANIC = "FILE_PANIC";
+    private static final String KEY_FILE_DOWNLOADS = "FILE_DOWNLOADS";
+    private static final String KEY_FILE_GALLERY = "FILE_GALLERY";
     private static final String KEY_TELEFONO = "TELEFONO";
-    private static final String KEY_INTERVALO = "INTERVALO";
+    private static final String KEY_INTERVALO_MSJ = "INTERVALO_MSJ";
+    private static final String KEY_INTERVALO_REMOTE_PANIC = "INTERVALO_REMOTE_PANIC";
     private static final String KEY_MENSAJE = "MENSAJE";
     private static final String KEY_BLOQUEO = "BLOQUEO";
     public static final String KEY_BLOQUEO_T1 = "Permanente";
@@ -27,53 +30,30 @@ public class UserPreferencesManager {
     public static String DROPBOX_TOKEN = null;
     private ChangeListener changeListener = null;
     private ChangeListener changeListener2 = null;
+    String TAG = "UserPreferencesManager";
 
     SharedPreferences pref;
     Editor editor;
     public static Context _context;
-    int PRIVATE_MODE = 0;
     private static final String PREFER_NAME = "SesionPref";
 
     // Constructor
     public UserPreferencesManager(Context context) {
         this._context = context;
-        pref = _context.getSharedPreferences(PREFER_NAME, PRIVATE_MODE);
+        pref = _context.getSharedPreferences(PREFER_NAME, Context.MODE_PRIVATE);
         editor = pref.edit();
 
     }
-    //GETTERS KEY
-    public static String getKeyCorreo() {
-        return KEY_CORREO;
-    }
 
-    public static String getKeyTelefono() {
-        return KEY_TELEFONO;
-    }
-
-    public static String getKeyIntervalo() {
-        return KEY_INTERVALO;
-    }
-
-    public static String getKeyMensaje() {
-        return KEY_MENSAJE;
-    }
-
-    public static String getKeyBloqueo() {
-        return KEY_BLOQUEO;
-    }
-
-    public static String getKeyToken() {
-        return KEY_TOKEN;
-    }
-
-
-    public String getTokenDB(){return pref.getString(KEY_TOKENDB, "");}
+    public String getTokenDB(){return pref.getString(KEY_TOKENDB, null);}
 
     public void setTokenDB(String token){
         DROPBOX_TOKEN = token;
+        RegisterActivity.dbAuth = true;
         editor.putString(KEY_TOKENDB, token);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, " "+ getTokenDB());
     }
 
     public String getToken(){return pref.getString(KEY_TOKEN, "");}
@@ -83,6 +63,15 @@ public class UserPreferencesManager {
         editor.putString(KEY_TOKEN, token);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, ""+ getToken());
+        SharedPreferences prefer = _context.getSharedPreferences("ActivityPREF", Context.MODE_PRIVATE);
+//        if(!prefer.getBoolean("activity_executed", false)){
+//            Utils.log(TAG, "actividad ejecutada primera vez, inicia socket");
+//            SocketManager.startSocket();
+//        }
+
+
+
     }
 
     public boolean isPanico() {return pref.getBoolean(KEY_PANICO, false);}
@@ -91,8 +80,9 @@ public class UserPreferencesManager {
         editor.putBoolean(KEY_PANICO, panico);
         editor.apply();
         editor.commit();
-        if (panico)        Log.e("PANICO", "ACTIVO");
-        else               Log.e("PANICO", "INACTIVO");
+        if (panico)        Utils.log(TAG, "PANICO ACTIVO");
+        else               Utils.log(TAG,"PANICO INACTIVO");
+        Utils.log(TAG, ""+ isPanico());
     }
 
     public boolean isPanicoPress() {return pref.getBoolean(KEY_PRESS_PANICO, false);}
@@ -103,16 +93,40 @@ public class UserPreferencesManager {
         editor.commit();
         if (panicoPress)        Log.e("panicoPress", "ACTIVO");
         else               Log.e("panicoPress", "INACTIVO");
+        Utils.log(TAG, ""+ isPanicoPress());
     }
 
-    public boolean isFiles() {return pref.getBoolean(KEY_FILE, false);}
+    public boolean isFilesPanic() {return pref.getBoolean(KEY_FILE_PANIC, false);}
 
-    public void setFiles(boolean file){
-        editor.putBoolean(KEY_FILE, file);
+    public void setFilesPanic(boolean file){
+        editor.putBoolean(KEY_FILE_PANIC, file);
         editor.apply();
         editor.commit();
-        if (file)        Log.e("file", "ACTIVO");
-        else               Log.e("file", "INACTIVO");
+        if (file)        Utils.log(TAG, "HAY CARPETA panic");
+        else               Utils.log(TAG, "NO HAY CARPETA panic");
+        Utils.log(TAG, ""+ isFilesPanic());
+    }
+
+    public boolean isFilesDownloads() {return pref.getBoolean(KEY_FILE_DOWNLOADS, false);}
+
+    public void setFilesDownloads(boolean file){
+        editor.putBoolean(KEY_FILE_DOWNLOADS, file);
+        editor.apply();
+        editor.commit();
+        if (file)        Utils.log(TAG, "HAY CARPETA download");
+        else               Utils.log(TAG, "NO HAY CARPETAS download");
+        Utils.log(TAG, ""+ isFilesDownloads());
+    }
+
+    public boolean isFilesPhotos() {return pref.getBoolean(KEY_FILE_GALLERY, false);}
+
+    public void setFilesPhotos(boolean file){
+        editor.putBoolean(KEY_FILE_GALLERY, file);
+        editor.apply();
+        editor.commit();
+        if (file)        Utils.log(TAG, "HAY CARPETA gallery");
+        else               Utils.log(TAG, "NO HAY CARPETA gallery");
+        Utils.log(TAG, ""+ isFilesPhotos());
     }
 
     public String getBloqueo(){return pref.getString(KEY_BLOQUEO, KEY_BLOQUEO_T1);}
@@ -122,15 +136,27 @@ public class UserPreferencesManager {
         editor.putString(KEY_BLOQUEO, bloqueo);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, ""+ getBloqueo());
     }
 
-    public String getIntervalo(){return pref.getString(KEY_INTERVALO, "15");}
+    public String getIntervaloMsj(){return pref.getString(KEY_INTERVALO_MSJ, "15");}
 
-    public void setIntervalo(String intervalo){
+    public void setIntervaloMsj(String intervalo){
 
-        editor.putString(KEY_INTERVALO, intervalo);
+        editor.putString(KEY_INTERVALO_MSJ, intervalo);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, ""+ getIntervaloMsj());
+    }
+
+    public String getIntervaloPanic(){return pref.getString(KEY_INTERVALO_REMOTE_PANIC, "8");}
+
+    public void setIntervaloPanic(String intervalo){
+
+        editor.putString(KEY_INTERVALO_REMOTE_PANIC, intervalo);
+        editor.apply();
+        editor.commit();
+        Utils.log(TAG, ""+ getIntervaloPanic());
     }
 
     public String getMensaje(){return pref.getString(KEY_MENSAJE, "Me paso algo aiura :c");}
@@ -140,12 +166,14 @@ public class UserPreferencesManager {
         editor.putString(KEY_MENSAJE, mensaje);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, ""+ getMensaje());
     }
 
     public void setCorreo(String correo) {
         editor.putString(KEY_CORREO, correo);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, ""+ getCorreo());
     }
 
     public String getCorreo() {
@@ -156,40 +184,11 @@ public class UserPreferencesManager {
         editor.putString(KEY_TELEFONO, telefono);
         editor.apply();
         editor.commit();
+        Utils.log(TAG, ""+ getTelefono());
     }
 
     public String getTelefono() {
         return pref.getString(KEY_TELEFONO, "");
     }
 
-    public void destroyed(){
-        editor.clear();
-        editor.apply();
-        editor.commit();
-    }
-
-
-    public void setVariableChangeListener(ChangeListener variableChangeListener) {
-        this.changeListener = variableChangeListener;
-        if( _TOKEN != null) {
-            // call the listener here, note that we don't want to a strong coupling
-            // between the listener and where the event is occurring. With this pattern
-            // the code has the flexibility of assigning the listener
-            this.changeListener.onChange(_TOKEN);
-        }
-
-    }
-
-    public void setVariableChangeListener2(ChangeListener variableChangeListener) {
-        this.changeListener2 = variableChangeListener;
-        Utils.log("user preferences listener", "entro");
-        if( DROPBOX_TOKEN != null) {
-            Utils.log("user preferences listener", "tokenThatHasChanged: " + DROPBOX_TOKEN);
-            // call the listener here, note that we don't want to a strong coupling
-            // between the listener and where the event is occurring. With this pattern
-            // the code has the flexibility of assigning the listener
-            this.changeListener2.onChange(DROPBOX_TOKEN);
-        }
-
-    }
 }

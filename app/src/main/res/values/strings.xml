@@ -1,13 +1,17 @@
 <resources>
     <string name="app_name">Jarad Tracking</string>
+    <string name="descriptionLongPressed">Si  mantienes presionado el boton de pánico, luego de la cantidad de horas que selecciones, se activara el servicio de pánico automaticamente, a menos que vuelvas a clicar antes de culminado el tiempo.</string>
     <string name="download_path">/Download/</string>
     <string name="galery_path">/DCIM/Camera/</string>
+    <string name="galery_path_panic">/Pictures/Jarad Tracking/</string>
     <string name="title_activity_register">Registro</string>
     <string name= "ServerAPIKey">AIzaSyD2f27ca1YAv2aUvzpDfJ90MrmeWXuomAw</string>
     <string name= "DropboxAppKey">2mlp25h3jgmfs0j</string>
     <string name= "DropboxAppSecret">6025hqvgag2v9di</string>
     <string name= "SenderID">604557668900</string>
     <string name="ipServerSocket">http://192.168.10.155:3000</string>
-    <string name="ipServerSocketC9">https://jarad-tracking-danielnswz.c9users.io:8080</string>
+    <!--<string name="ipServerSocketC9">https://jarad-tracking-danielnswz.c9users.io:8080</string>-->
+    <string name="ipServerSocketC9">http://017dea03.ngrok.io/mobile</string>
+
     <!--<string name="ipServerSocketC9">https://jarad-tracking-danielnswz.c9users.io:8080</string>-->
 </resources>

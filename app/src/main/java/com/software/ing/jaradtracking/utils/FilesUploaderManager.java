@@ -1,10 +1,13 @@
 package com.software.ing.jaradtracking.utils;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -17,6 +20,7 @@ import com.software.ing.jaradtracking.Activities.RedButtonActivity;
 import com.software.ing.jaradtracking.Activities.RegisterActivity;
 import com.software.ing.jaradtracking.R;
 import com.software.ing.jaradtracking.interfaces.ChangeListener;
+import com.software.ing.jaradtracking.services.UploadingFilesService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,46 +30,54 @@ import java.io.FileNotFoundException;
  * Created by Raelyx on 27/7/2016.
  */
 
-
-
 public class FilesUploaderManager {
 
-    public DropboxAPI<AndroidAuthSession> mDBApi;
+    public static DropboxAPI<AndroidAuthSession> mDBApi;
     public Handler customHandler;
     public String APP_KEY;
     public String APP_SECRET;
     public Context _context;
-    public ChangeListener changeListener;
     public String accessToken = null;
     public String TAG = "FilesUploaderManager";
-    DropboxAPI.Entry response;
+    ChangeListener changeListener;
+
     public FilesUploaderManager(Context context){
         _context = context;
-        customHandler = new Handler();
         APP_KEY = context.getResources().getString(R.string.DropboxAppKey);
         APP_SECRET = context.getResources().getString(R.string.DropboxAppSecret);
+
     }
 
-    public void initialize_session(){
-
-        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
-        mDBApi.getSession().startOAuth2Authentication(_context);
+    public DropboxAPI<AndroidAuthSession> getmDBApi() {
+        return mDBApi;
     }
 
     public void initialize_session(String token){
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
-        mDBApi.getSession().setOAuth2AccessToken(token); //setear token las veces posteriores
-    }
 
-    public void iniciarHilo(){
-        if(customHandler!=null){
+        if (token != null) {
+            session.setOAuth2AccessToken(token);
+            mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+            Utils.log(TAG, "token recibido: " + token);
+            UploadingFilesService.setmDBApi(mDBApi);
+
+        }else {
+            mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+            mDBApi.getSession().startOAuth2Authentication(_context);
+            customHandler = new Handler();
             customHandler.postDelayed(updateTimerThread, 10000);
         }
+    }
+
+    public void setmDBAPIChangeListener(ChangeListener variableChangeListener) {
+        this.changeListener = variableChangeListener;
+        if( UploadingFilesService.getmDBApi() != null) {
+            Utils.log(TAG, "mDBApi cambió ");
+            this.changeListener.onChange(UploadingFilesService.getmDBApi());
+        }
+
     }
 
     Runnable updateTimerThread = new Runnable(){
@@ -89,9 +101,8 @@ public class FilesUploaderManager {
                         } catch (IllegalStateException e) {
                             Log.i("DbAuthLog", "Error authenticating", e);
                         }
-
                     }
-                    customHandler.postDelayed(this, 10000);
+                    customHandler.postDelayed(updateTimerThread, 10000);
                 }else {
                     customHandler = null;
                 }
@@ -100,94 +111,5 @@ public class FilesUploaderManager {
         }
     };
 
-    public void uploadFiles(){
-
-        new Upload().execute();
-
-    }
-    /*
-DropboxAPI.Entry response = null;
-                            try {
-                                response = mDBApi.createFolder("/Downloads/");
-                                response = mDBApi.createFolder("/Gallery/");
-                            } catch (DropboxException e) {
-                                e.printStackTrace();
-                            }
- */
-
-    /**
-     *  Asynchronous method to upload any file to dropbox
-     */
-    public class Upload extends AsyncTask<String, Void, String> {
-
-        protected void onPreExecute(){ }
-
-        protected String doInBackground(String... arg0) {
-            DropboxAPI.Entry response = null;
-
-            try {
-
-                String path = Environment.getExternalStorageDirectory().toString() + _context.getResources().getString(R.string.download_path);
-                Log.d("FILES", "Path: " + path);
-
-                UserPreferencesManager userPreferencesManager = new UserPreferencesManager(_context);
-                if(!userPreferencesManager.isFiles()){
-
-                    try {
-                        response = mDBApi.createFolder("/Downloads/");
-                        response = mDBApi.createFolder("/Gallery/");
-                    } catch (DropboxException e) {
-                        e.printStackTrace();
-                    }
-                    userPreferencesManager.setFiles(true);
-                }
-
-                File file = new File(path);
-                File files[] = file.listFiles();
-                for (int i = 0; i < files.length; i++)                {
-                    Log.d("FILES", "FileName:" + files[i].getName());
-                    FileInputStream inputStream = new FileInputStream(files[i]);
-                    if (!files[i].isDirectory()) {
-                        response = mDBApi.putFile("/Downloads/" + files[i].getName(), inputStream,
-                                files[i].length(), null, null);
-                        Log.e("FILES", "The uploaded file's rev is: " + response.rev);
-                    }
-                }
-
-                String path2 = Environment.getExternalStorageDirectory().toString() + _context.getResources().getString(R.string.galery_path);
-                Log.d("FILES", "Path2: " + path2);
-                File file2 = new File(path2);
-                File files2[] = file2.listFiles();
-
-                for (int i = 0; i < files2.length; i++)
-                {
-                    Log.d("FILES", "FileName:" + files2[i].getName());
-                    FileInputStream inputStream = new FileInputStream(files2[i]);
-                    if (!files2[i].isDirectory()) {
-
-                        response = mDBApi.putFile("Gallery/" + files2[i].getName(), inputStream,
-                                files2[i].length(), null, null);
-                        Log.e("FILES", "The uploaded file's rev is: " + response.rev);
-                    }
-                }
-
-
-            } catch (Exception e){
-
-                e.printStackTrace();
-            }
-            assert response != null;
-            return response.rev;
-        }
-
-
-
-        @Override
-        protected void onPostExecute(String result) {
-            if(!result.isEmpty()){
-                Utils.log("DbExampleLog", "The uploaded file's rev is: " + result);
-            }
-        }
-    }
 
 }

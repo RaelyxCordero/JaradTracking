@@ -27,19 +27,16 @@ public class Utils {
         return strFile;
     }
 
-    public static File getFileByN(int i, ArrayList<Uri> mMedia) {
-        Uri uri=mMedia.get(i);
-        if (!uri.toString().contains("content://")) {
-           return new File(uri.toString());
-        }
-        return new File(uri.getPath());
+
+    public static long getIntervalMinute(String intervalo) {
+        return Long.valueOf(intervalo)*60000; /** minuto*/
     }
 
-    public static long getInterval(String intervalo) {
-        return Long.valueOf(intervalo)*60000;
+    public static long getIntervalHour(String intervalo) {
+        return Long.valueOf(intervalo)*3600000; /** hora*/
     }
 
     public static void log (String TAG, String msj){
-        Log.e("XD" + TAG, msj);
+        Log.e("TULOG" + TAG, msj);
     }
 }

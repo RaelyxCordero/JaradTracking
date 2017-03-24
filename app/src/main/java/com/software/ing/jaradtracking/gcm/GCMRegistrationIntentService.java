@@ -11,6 +11,7 @@ import com.google.android.gms.iid.InstanceID;
 import com.software.ing.jaradtracking.Activities.RegisterActivity;
 import com.software.ing.jaradtracking.R;
 import com.software.ing.jaradtracking.interfaces.ChangeListener;
+import com.software.ing.jaradtracking.utils.SocketManager;
 import com.software.ing.jaradtracking.utils.UserPreferencesManager;
 
 /**
@@ -36,13 +37,7 @@ public class GCMRegistrationIntentService extends IntentService {
             InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
             token = instanceID.getToken(getString(R.string.gcm_defaultSenderId), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             UserPreferencesManager session = new UserPreferencesManager(getApplicationContext());
-//            session.setVariableChangeListener(new ChangeListener() {
-//                @Override
-//                public void onChange(String tokenThatHasChanged) {
-//                    Log.e("TOKENONCHANGE", tokenThatHasChanged);
-////                    startService(new Intent(getApplicationContext(), SocketService.class));
-//                }
-//            });
+
             session.setToken(token);
             Log.w("GCMRegIntentService", "token:" + token);
             //notify to UI that registration complete success

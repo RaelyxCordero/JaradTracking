@@ -22,7 +22,7 @@ public class GPSManager {
     double lat;
     double lon;
 
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 100 meters
     public static final long MIN_TIME_BW_UPDATES = 1000 * 10 ; // 10 seg
     private Activity activity;
 

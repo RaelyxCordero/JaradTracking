@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.software.ing.jaradtracking.utils.SocketManager;
 import com.software.ing.jaradtracking.utils.UserPreferencesManager;
+import com.software.ing.jaradtracking.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,20 +17,21 @@ import org.json.JSONObject;
 
 public class SmsEvent extends BroadcastReceiver {
 
-  //  final SmsManager sms = SmsManager.getDefault();
   UserPreferencesManager userPreferencesManager;
     JSONObject evento;
     String nombreEvento;
     String tipoEvento;
+    String TAG = "SmsEvent";
 
     public SmsEvent() {}
-    //mensajes entrantes
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
         Bundle extras = intent.getExtras();
 
             try {
+                //MENSAJES ENTRANTES
 
                 if (extras != null) {
 
@@ -43,12 +45,14 @@ public class SmsEvent extends BroadcastReceiver {
                         String senderNum = phoneNumber;
                         String message = currentMessage.getDisplayMessageBody();
                         //por aqui se envia el mensaje a la consola
-                        Log.i("Mensaje", "De: "+ senderNum + "; mensaje: " + message);
+                        Utils.log(TAG, "Mensaje de: "+ senderNum);
+                        Utils.log(TAG, "dice: " + message);
 
                         userPreferencesManager = new UserPreferencesManager(context);
 
                         nombreEvento = "Ha llegado un mensaje de este numero: " + senderNum;
                         tipoEvento = "MENSAJE";
+
                         if (userPreferencesManager.isPanico()){
                             evento = new JSONObject();
                             try {
@@ -64,23 +68,12 @@ public class SmsEvent extends BroadcastReceiver {
                             }
                         }
 
-
-                        // Show alert
-                      //  int duration = Toast.LENGTH_LONG;
-                      //  Toast toast = Toast.makeText(context, "senderNum: "+ senderNum + ", message: " + message, duration);
-                      //  toast.show();
-
-                    } // end for loop
-                } // bundle is null
+                    }
+                }
 
             } catch (Exception e) {
                 Log.e("SmsReceiver", "Exception smsReceiver" +e);
 
             }
-
-
-
         }
-
-
 }

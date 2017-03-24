@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -14,7 +15,10 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.software.ing.jaradtracking.Activities.RedButtonActivity;
 import com.software.ing.jaradtracking.R;
+import com.software.ing.jaradtracking.services.InformationRecoveryService;
+import com.software.ing.jaradtracking.services.LockingService;
 import com.software.ing.jaradtracking.services.PanicService;
+import com.software.ing.jaradtracking.services.UploadingFilesService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +38,7 @@ public final class SocketManager {
     static UserPreferencesManager userPreferencesManager;
     static Handler customHandler;
     static String TAG = "SocketManager";
+    public static boolean socketStatus = false;
 
     public SocketManager() {    }
 
@@ -42,7 +47,7 @@ public final class SocketManager {
         public void run(){
             if(customHandler!=null){
                 socket.connect();
-                Utils.log(TAG,"HILO" + "ENTRO" );
+                Utils.log(TAG+" HILO" , "TRATANDO DE CONECTAR" );
                 customHandler.postDelayed(this, 10000);
             }
         }
@@ -57,6 +62,13 @@ public final class SocketManager {
         SocketManager fragment = new SocketManager();
 
         return fragment;
+    }
+
+    public static void tryToConnect(){
+        if(!socketStatus){
+            socket.connect();
+        }
+
     }
 
     public static void startSocket(){
@@ -80,17 +92,21 @@ public final class SocketManager {
         socket.on(com.github.nkzawa.socketio.client.Socket.EVENT_DISCONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Utils.log(TAG,"SOCKET DISCONECTED" + "ENTRO" );
+                Utils.log(TAG,"SOCKET DISCONECTED" + " ENTRO" );
+
+                Looper.prepare();
                 customHandler = new Handler();
                 customHandler.postDelayed(updateTimerThread, 1000);
+                socketStatus = false;
             }
         });
 
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Utils.log(TAG,"SOCKET CONECTED" +"ENTRO" );
+                Utils.log(TAG,"SOCKET CONECTED" +" ENTRO" );
                 customHandler = null;
+                socketStatus = true;
             }
         });
 
@@ -102,11 +118,17 @@ public final class SocketManager {
                     if (response.get("status").equals(true)){
 
                         aplicationContext.startService(new Intent(aplicationContext, PanicService.class));
+                        aplicationContext.startService(new Intent(aplicationContext, LockingService.class));
+                        aplicationContext.startService(new Intent(aplicationContext, InformationRecoveryService.class));
+                        aplicationContext.startService(new Intent(aplicationContext, UploadingFilesService.class));
                         userPreferencesManager.setPanico(true);
 
 
                     }else if (response.get("status").equals(false)){
                         aplicationContext.stopService(new Intent(aplicationContext, PanicService.class));
+                        aplicationContext.stopService(new Intent(aplicationContext, LockingService.class));
+                        aplicationContext.startService(new Intent(aplicationContext, InformationRecoveryService.class));
+                        aplicationContext.stopService(new Intent(aplicationContext, UploadingFilesService.class));
                         userPreferencesManager.setPanico(false);
 
                     }
@@ -126,8 +148,6 @@ public final class SocketManager {
                 try {
                     if (response.get("success").equals(true)){
                         Utils.log(TAG,"EMIT REGISTER SUCCESS" );
-//                        Intent tutorial = new Intent(aplicationContext, RedButtonActivity.class);
-//                        aplicationContext.startActivity(tutorial);
                         success = response.get("success").equals(true);
                     }else {
                        success = false;
@@ -166,6 +186,11 @@ public final class SocketManager {
     public static void emitMsjs (JSONObject msjs){
         if(socket!= null)
             socket.emit("new:message", msjs);
+    }
+
+    public static void emitEmergencyMail (JSONObject mail){
+        if(socket!= null)
+            socket.emit("config:mail", mail);
     }
 
     public static void emitPhoneEvent (JSONObject event){

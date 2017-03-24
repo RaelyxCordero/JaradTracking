@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.software.ing.jaradtracking.interfaces.ChangeListener;
+import com.software.ing.jaradtracking.services.UploadingFilesService;
+import com.software.ing.jaradtracking.utils.Utils;
+
 /**
  * This is the component that is responsible for actual device administration.
  * It becomes the receiver when a policy is applied. It is important that we
@@ -18,36 +22,51 @@ public class DemoDeviceAdminReceiver extends DeviceAdminReceiver {
     @Override
     public void onEnabled(Context context, Intent intent) {
         super.onEnabled(context, intent);
-        //Toast.makeText(context, R.string.device_admin_enabled,
-          //      Toast.LENGTH_LONG).show();
-        Log.d(TAG, "onEnabled");
+        Utils.log(TAG, "onEnabled");
+
     }
+
 
     /** Called when this application is no longer the device administrator. */
     @Override
     public void onDisabled(Context context, Intent intent) {
         super.onDisabled(context, intent);
-        //Toast.makeText(context, R.string.device_admin_disabled,
-          //      Toast.LENGTH_LONG).show();
-        Log.d(TAG, "onDisabled");
+        Utils.log(TAG, "onDisabled");
     }
 
     @Override
     public void onPasswordChanged(Context context, Intent intent) {
         super.onPasswordChanged(context, intent);
-        Log.d(TAG, "onPasswordChanged");
+        Utils.log(TAG, "onPasswordChanged");
     }
 
     @Override
     public void onPasswordFailed(Context context, Intent intent) {
         super.onPasswordFailed(context, intent);
-        Log.d(TAG, "onPasswordFailed");
+        Utils.log(TAG, "onPasswordFailed");
     }
 
     @Override
     public void onPasswordSucceeded(Context context, Intent intent) {
         super.onPasswordSucceeded(context, intent);
-        Log.d(TAG, "onPasswordSucceeded");
+        Utils.log(TAG, "onPasswordSucceeded");
     }
 
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+
+        if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+            // DO WHATEVER YOU NEED TO DO HERE
+            Utils.log(TAG,"SCREEN_ON");
+
+
+        }
+
+        if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+            // DO WHATEVER YOU NEED TO DO HERE
+            Utils.log(TAG, "SCREEN_OFF");
+
+        }
+    }
 }

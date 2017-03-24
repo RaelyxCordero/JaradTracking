@@ -21,7 +21,6 @@ import java.util.List;
 import biz.kasual.materialnumberpicker.MaterialNumberPicker;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-//import uneg.software.sebu.utils.UserPreferencesManager;
 
 
 
@@ -52,8 +51,8 @@ public class MensajesDialogFragment extends DialogFragment implements View.OnCli
         ButterKnife.inject(this, view);
         session=new UserPreferencesManager(getActivity());
 
-        if(!session.getIntervalo().equals("")){
-            intervalo.setValue(Integer.parseInt(session.getIntervalo()));
+        if(!session.getIntervaloMsj().equals("")){
+            intervalo.setValue(Integer.parseInt(session.getIntervaloMsj()));
         }
 
         mensajeAEnviar.setText(session.getMensaje());
@@ -65,16 +64,12 @@ public class MensajesDialogFragment extends DialogFragment implements View.OnCli
     }
 
 
-    public static MensajesDialogFragment newInstance() {
-        return new MensajesDialogFragment();
-    }
-
     @Override
     public void onClick(View view) {
         switch (view.getId())
         {
             case R.id.guardarConfigMsj:
-                session.setIntervalo(String.valueOf(intervalo.getValue()));
+                session.setIntervaloMsj(String.valueOf(intervalo.getValue()));
                 session.setMensaje(mensajeAEnviar.getText().toString());
                 this.dismiss();
                 break;
@@ -85,7 +80,7 @@ public class MensajesDialogFragment extends DialogFragment implements View.OnCli
 
     @Override
     public void onValidationSucceeded() {
-        session.setIntervalo(String.valueOf(intervalo.getValue()));
+        session.setIntervaloMsj(String.valueOf(intervalo.getValue()));
         session.setMensaje(mensajeAEnviar.getText().toString());
         this.dismiss();
     }
@@ -104,11 +99,5 @@ public class MensajesDialogFragment extends DialogFragment implements View.OnCli
         }
     }
 
-
-    private void solicitarCambio()
-    {
-
-
-    }
 
 }

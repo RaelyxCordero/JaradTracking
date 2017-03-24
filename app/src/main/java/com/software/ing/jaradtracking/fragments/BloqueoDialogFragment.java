@@ -23,7 +23,7 @@ import java.util.List;
 import biz.kasual.materialnumberpicker.MaterialNumberPicker;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-//import uneg.software.sebu.utils.UserPreferencesManager;
+
 
 
 public class BloqueoDialogFragment extends DialogFragment implements View.OnClickListener, Validator.ValidationListener {

@@ -1,20 +1,19 @@
 package com.software.ing.jaradtracking.services;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.software.ing.jaradtracking.Activities.RegisterActivity;
-import com.software.ing.jaradtracking.utils.FilesUploaderManager;
+import com.software.ing.jaradtracking.eventsCatcher.SystemsEvents;
 import com.software.ing.jaradtracking.utils.GPSManager;
 import com.software.ing.jaradtracking.utils.SocketManager;
-import com.software.ing.jaradtracking.utils.UserPreferencesManager;
 import com.software.ing.jaradtracking.utils.Utils;
 
 import org.json.JSONException;
@@ -27,32 +26,32 @@ import org.json.JSONObject;
 public class GPService extends Service implements LocationListener{
 
     private Handler customHandler;
-    private UserPreferencesManager session;
     private GPSManager gpsManager;
-    private SocketManager socketManager;
-    private boolean delayed = false;
+    public static boolean gpServiceStatus = false;
     String TAG = "GPService";
 
 
     public void onCreate() {
         super.onCreate();
-        session = new UserPreferencesManager(this);
+
         gpsManager = new GPSManager(this);
         customHandler = new Handler();
-
         SocketManager.setAplicationContext(this);
+        if(!SocketManager.socketStatus){
+            SocketManager.startSocket();
+        }
         if(gpsManager.obtainLastKnowLocation()!=null){
             onLocationChanged(gpsManager.getLocation());
-            enviarAlerta();
-        }else {
-            delayed = true;
+            sendLocation();
+            gpServiceStatus = true;
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        customHandler=null;
+        customHandler = null;
+        gpServiceStatus = false;
     }
 
     //hilo que envia geolocalizacion
@@ -60,31 +59,36 @@ public class GPService extends Service implements LocationListener{
 
         public void run(){
             if(customHandler!=null){
-                enviarAlerta();
+                if(!SocketManager.socketStatus){
+                    SocketManager.setAplicationContext(getApplicationContext());
+                    Utils.log(TAG, "socket status false");
+                    SocketManager.tryToConnect();
+                }
+                sendLocation();
             }
         }
     };
 
-    private void enviarAlerta()   {
+    private void sendLocation()   {
+
+        Location location  = gpsManager.obtainLastKnowLocation();
+
 
         JSONObject position = new JSONObject();
-
         try {
-            position.put("latitud", gpsManager.getLocation().getLatitude());
-            position.put("longitud", gpsManager.getLocation().getLongitude());
+            position.put("latitud", location.getLatitude());
+            position.put("longitud", location.getLongitude());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        } catch (JSONException e) {            e.printStackTrace();        }
 
-        SocketManager.emitLocation(position);
+       SocketManager.emitLocation(position);
 
-        Utils.log(TAG, "LATITUD"+String.valueOf(gpsManager.getLocation().getLatitude()));
-        Utils.log(TAG, "LONGITUD"+ String.valueOf(gpsManager.getLocation().getLongitude()));
+        Utils.log(TAG, "LATITUD: "+String.valueOf(location.getLatitude()));
+        Utils.log(TAG, "LONGITUD: "+ String.valueOf(location.getLongitude()));
+
 
         if(customHandler!=null) {
             customHandler.postDelayed(updateTimerThread, GPSManager.MIN_TIME_BW_UPDATES);
-            Toast.makeText(GPService.this, "lt y lng", Toast.LENGTH_SHORT).show();
         }
 
     }

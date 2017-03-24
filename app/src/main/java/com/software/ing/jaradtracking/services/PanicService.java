@@ -11,19 +11,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.SmsManager;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
-import com.software.ing.jaradtracking.Activities.RegisterActivity;
 import com.software.ing.jaradtracking.R;
-import com.software.ing.jaradtracking.utils.FilesUploaderManager;
 import com.software.ing.jaradtracking.utils.GPSManager;
 import com.software.ing.jaradtracking.utils.PictureSaver;
 import com.software.ing.jaradtracking.utils.SocketManager;
@@ -35,14 +28,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-
-
 
 
 public class PanicService extends Service implements LocationListener {
@@ -51,24 +36,36 @@ public class PanicService extends Service implements LocationListener {
    private UserPreferencesManager session;
    private boolean delayed = false;
     private GPSManager gpsManager;
-    SocketManager socketManager;
-    FilesUploaderManager filesUploaderManager;
+    JSONObject evento;
+    String TAG = "PanicService";
+
+
 
    @Override
    public void onCreate() {
        super.onCreate();
        gpsManager = new GPSManager(this);
-       SocketManager.setAplicationContext(this);
+
        session = new UserPreferencesManager(this);
        customHandler = new Handler();
-       enviarMensajes();
+       customHandler.postDelayed(updateTimerThread2, 0);
        delayed = true;
-       filesUploaderManager = new FilesUploaderManager(getApplicationContext());
-       filesUploaderManager.initialize_session(session.getTokenDB());
-       filesUploaderManager.uploadFiles();
-//       socketManager.startSocket();
+       sendEmail();
 
    }
+
+    public void sendEmail(){
+        JSONObject json = new JSONObject();
+        try {
+            json.put("mail", session.getCorreo());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        SocketManager.emitEmergencyMail(json);
+    }
+
 
    @Override
    public void onDestroy() {
@@ -86,61 +83,77 @@ public class PanicService extends Service implements LocationListener {
        }
    };
 
-   private static void showMessage(String message) {
-       Log.i("PANIC SERVICE", message);
-   }
 
    @Override public IBinder onBind(Intent intent) { return null; }
 
    private void uploadPhoto(File file) {
-       showMessage("Subiendo imagen");
-        Log.w("BASE64" , Utils.fileToBase64(file));//,
-//               alarma.getId(),
-//               String.valueOf(gpsManager.getLocation().getLatitude()),
-//               String.valueOf(gpsManager.getLocation().getLongitude()),
-//                       mUploadCallBack);
+
+       if (file != null) {
+           if(UploadingFilesService.uploadingStatus){
+               UploadingFilesService.setPanicPhoto(file);
+               UploadingFilesService.uploadPanicPhotos();
+           }
+
+
+           evento = new JSONObject();
+           try {
+               Utils.log(TAG, "Subiendo foto");
+               Utils.log(TAG+" BASE64" , Utils.fileToBase64(file));//,
+
+               evento.put("event", Utils.fileToBase64(file) );
+               evento.put("type", "PICTURE");
+
+           } catch (JSONException e) {
+               e.printStackTrace();
+           }
+           Utils.log(TAG, ""+ evento);
+           SocketManager.emitPhoneEvent(evento);
+
+       }
+
    }
 
 
    @SuppressWarnings("deprecation")
    private void takePhoto(final Context context) {
+
+       Utils.log(TAG, "take foto");
        final SurfaceView preview = new SurfaceView(context);
        SurfaceHolder holder = preview.getHolder();
 //        deprecated setting, but required on Android versions prior to 3.0
        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
        holder.addCallback(new SurfaceHolder.Callback() {
+
            @Override
-           //The preview must happen at or after this point or takePicture fails
            public void surfaceCreated(SurfaceHolder holder) {
-               showMessage("Surface created");
+               Utils.log(TAG,"Surface created");
 
                Camera camera = null;
 
                try {
                    camera = Camera.open();
-                   showMessage("Opened camera");
+                   Utils.log(TAG,"Opened camera");
 
                    try {
                        camera.setPreviewDisplay(holder);
                    } catch (IOException e) {
-                       showMessage(e.getMessage());
+                       Utils.log(TAG, e.getMessage());
                    }
 
                    camera.startPreview();
-                   showMessage("Started preview");
+                   Utils.log(TAG,"Started preview");
 
                    camera.takePicture(null, null, new Camera.PictureCallback() {
 
                        @Override
                        public void onPictureTaken(byte[] data, Camera camera) {
-                           showMessage("Took picture");
+                           Utils.log(TAG,"Took picture");
                            uploadPhoto(PictureSaver.savePicture(data, getString(R.string.app_name)));
                            camera.release();
                        }
                    });
                } catch (Exception e) {
-                   showMessage(e.getMessage());
+                   Utils.log(TAG, e.getMessage());
                    if (camera != null)
                        camera.release();
                }
@@ -155,6 +168,7 @@ public class PanicService extends Service implements LocationListener {
            }
        });
 
+
        WindowManager wm = (WindowManager)context
                .getSystemService(Context.WINDOW_SERVICE);
        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -168,29 +182,33 @@ public class PanicService extends Service implements LocationListener {
        wm.addView(preview, params);
    }
 
-
    private void enviarMensajes(){
 
+       Location location  = gpsManager.obtainLastKnowLocation();
+
        try {
-               SmsManager smsManager = SmsManager.getDefault();
-           if(session.getTelefono() != null) {
+           SmsManager smsManager = SmsManager.getDefault();
+           if(!session.getTelefono().equals("")) {
                smsManager.sendTextMessage(session.getTelefono(), null,
-                       session.getMensaje() + " con coordenadas: " +
-                               gpsManager.getLocation().getLatitude() + ", " +
-                               gpsManager.getLocation().getLongitude(), null, null);
-               Toast.makeText(getApplicationContext(), "SMS Sent!",
-                       Toast.LENGTH_LONG).show();
+                       session.getMensaje() +
+                                " con latitud: " +
+                               location.getLatitude() +
+                               " y longitud: " +
+                               location.getLongitude()
+                                , null, null);
+
+               Utils.log(TAG, "SMS Sent!");
+           }else{
+               Utils.log(TAG, "No envia mensaje porque no hay tlf registrado");
            }
        } catch (Exception e) {
-           Toast.makeText(getApplicationContext(),
-                   "SMS faild, please try again later!",
-                   Toast.LENGTH_LONG).show();
+           Utils.log(TAG, "SMS failed");
            e.printStackTrace();
-           showMessage("error sms "+e.getMessage());
+           Utils.log(TAG,"error sms "+e.getMessage());
        }
-       showMessage("envia mensaje");
+
        if(customHandler!=null){
-           customHandler.postDelayed(updateTimerThread2, Utils.getInterval(session.getIntervalo()));
+           customHandler.postDelayed(updateTimerThread2, Utils.getIntervalMinute(session.getIntervaloMsj()));
        }
    }
 

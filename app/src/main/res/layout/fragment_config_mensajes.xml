@@ -43,6 +43,7 @@
                     <biz.kasual.materialnumberpicker.MaterialNumberPicker
                         android:layout_width="match_parent"
                         android:layout_height="150dp"
+                        app:npDefaultValue="15"
                         android:id="@+id/tiempoMensajes"
                         app:npMinValue="1"
                         app:npMaxValue="60"

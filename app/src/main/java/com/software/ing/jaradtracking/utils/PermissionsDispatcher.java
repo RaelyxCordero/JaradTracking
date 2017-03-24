@@ -6,47 +6,30 @@ import permissions.dispatcher.PermissionUtils;
 
 
 public class PermissionsDispatcher {
-    private static final int REQUEST = 1234;
-    String TAG = "PermissionsDispatcher";
+    private static final int REQUEST = 1;
+    public static String TAG = "PermissionsDispatcher";
 
-    private static final String[] PERMISSIONS = new String[]
-            {"android.permission.CAMERA",
-                 "android.permission.READ_EXTERNAL_STORAGE",
-                    "android.permission.WAKE_LOCK",
+    public static final String[] PERMISSIONS = new String[]
+            {       "android.permission.ACCESS_FINE_LOCATION",
+                    "android.permission.CAMERA",
                     "android.permission.READ_PHONE_STATE",
                     "android.permission.READ_CONTACTS",
-                    "android.permission.READ_CALL_LOG",
-                    "android.permission.RECEIVE_SMS",
                     "android.permission.READ_SMS",
-                    "android.permission.SEND_SMS",
-                    "android.permission.ACCESS_WIFI_STATE",
-                    "android.permission.ACCESS_NETWORK_STATE",
-                    "android.permission.BLUETOOTH",
-                    "android.permission.BLUETOOTH_ADMIN",
-                    "android.permission.PROCESS_OUTGOING_CALLS",
-                    "android.permission.INTERNET",
-                    "android.permission.RECEIVE_BOOT_COMPLETED",
-                    "android.permission.ACCESS_FINE_LOCATION",
-                    "android.permission.WRITE_EXTERNAL_STORAGE",
-                    "android.permission.KILL_BACKGROUND_PROCESSES",
-                    "android.permission.BATTERY_STATS",
-                    "android.permission.SYSTEM_ALERT_WINDOW"
+                    "android.permission.WRITE_EXTERNAL_STORAGE"
             };
-//    private static final String[] PERMISSIONS = new String[] {"android.permission.WRITE_EXTERNAL_STORAGE",
-//        "android.permission.ACCESS_COARSE_LOCATION","android.permission.ACCESS_FINE_LOCATION",
-//        "android.permission.CALL_PHONE","android.permission.READ_PHONE_STATE","android.permission.CAMERA"};
 
 
-    private PermissionsDispatcher() {
-    }
+
+    private PermissionsDispatcher() {    }
 
     public static void showDialogPermissions(RegisterActivity target) {
         if (PermissionUtils.hasSelfPermissions(target, PERMISSIONS)) {
-            Utils.log("PermissionsDispatcher","IFshowDialogPermissions");
+            Utils.log(TAG,"IFshowDialogPermissions");
             target.init();
         } else {
-            Utils.log("PermissionsDispatcher","ELSEshowDialogPermissions");
+            Utils.log(TAG,"ELSEshowDialogPermissions");
             ActivityCompat.requestPermissions(target, PERMISSIONS, REQUEST);
+
         }
     }
 
@@ -54,10 +37,10 @@ public class PermissionsDispatcher {
         switch (requestCode) {
             case REQUEST:
                 if (!PermissionUtils.hasSelfPermissions(target, PERMISSIONS)) {
-                    Utils.log("PermissionsDispatcher","IFonRequestPermissionsResult");
+                    Utils.log(TAG,"IFonRequestPermissionsResult");
                     target.finish();
                 }else{
-                    Utils.log("PermissionsDispatcher","ELSEonRequestPermissionsResult");
+                    Utils.log(TAG,"ELSEonRequestPermissionsResult");
                     target.init();
                 }
                 break;

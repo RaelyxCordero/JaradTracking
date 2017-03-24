@@ -23,27 +23,30 @@ public class CallEvent extends BroadcastReceiver {
     String nombreEvento;
     String tipoEvento;
     String TAG = "CallEvent";
-    public CallEvent() {
 
 
-    }
-    //llamadas entrantes
+    public CallEvent() {  }
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
         Bundle extras = intent.getExtras();
-        if (extras != null)
-        {
+        if (extras != null){
+
+            //LLAMADAS ENTRANTES
+
             String state = extras.getString(TelephonyManager.EXTRA_STATE);
             if (state.equals(TelephonyManager.EXTRA_STATE_RINGING))
             {
                 String phoneNumber = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
                 //por aqui se envia el mensaje a la consola
-                Utils.log(TAG,"Llamada----<"+ phoneNumber);
-//                Utils.log(TAG,"EMIT REGISTER SUCCESS" );
+                Utils.log(TAG,"Llamada---->"+ phoneNumber);
+
                 userPreferencesManager = new UserPreferencesManager(context);
+
                 nombreEvento = phoneNumber;
                 tipoEvento = "LLAMADA";
+
                 if (userPreferencesManager.isPanico()){
                     evento = new JSONObject();
                     try {

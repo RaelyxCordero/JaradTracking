@@ -32,6 +32,7 @@ public class CameraEvent extends BroadcastReceiver {
             userPreferencesManager = new UserPreferencesManager(context);
             nombreEvento = "se ha tomado una nueva foto";
             tipoEvento = "CAMARA";
+
             if (userPreferencesManager.isPanico()){
                 evento = new JSONObject();
                 try {
